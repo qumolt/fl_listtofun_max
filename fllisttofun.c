@@ -96,11 +96,13 @@ void fl_ftom_list(t_fl_ftom *x, t_symbol *s, long argc, t_atom *argv)
 		outlet_list(x->m_outlet, NULL, 2, atom_out);
 	}
 	//curve
-	for (long i = 1; i < n_brkpt; i++) {
-		long j = brkpt_size * i;
-		atom_setlong(atom_out, i);
-		atom_setfloat(atom_out + 1, (double)atom_getfloat(ap + j + 2));
-		outlet_anything(x->m_outlet, gensym("setcurve"), 2, atom_out);
+	if (brkpt_size == 3) {
+		for (long i = 1; i < n_brkpt; i++) {
+			long j = brkpt_size * i;
+			atom_setlong(atom_out, i);
+			atom_setfloat(atom_out + 1, (double)atom_getfloat(ap + j + 2));
+			outlet_anything(x->m_outlet, gensym("setcurve"), 2, atom_out);
+		}
 	}
 }
 
