@@ -52,12 +52,11 @@ void fl_ftom_list(t_fl_ftom *x, t_symbol *s, long argc, t_atom *argv)
 {
 	long ac = argc;
 	t_atom *ap = argv;
-	short brkpt_size = x->mode ? 3 : 2; //mode 0:linear; mode 1:curve
+	short brkpt_size = x->mode ? 3 : 2; //mode 0:linear (y, x) //mode 1:curve (x, y, c)
 	double domain = 0.;
 	double range_i = 0.;
 	double range_f = 0.;
 	long n_brkpt = 0;
-	double x_accum = 0.;
 
 	t_atom atom_out[2];
 	atom_setfloat(atom_out, 0.);
@@ -69,12 +68,24 @@ void fl_ftom_list(t_fl_ftom *x, t_symbol *s, long argc, t_atom *argv)
 	}
 	
 	n_brkpt = ac / brkpt_size;
-	range_i = range_f = (double)atom_getfloat(ap);
-	for (long i = 0; i < n_brkpt; i++) {
-		long j = brkpt_size * i;
-		domain += (double)atom_getfloat(ap + j + 1);
-		range_i = (double)MIN(range_i, (double)atom_getfloat(ap + j));
-		range_f = (double)MAX(range_f, (double)atom_getfloat(ap + j));
+	if (brkpt_size == 3) { 
+		range_i = range_f = (double)atom_getfloat(ap + 1);
+		domain = (double)atom_getfloat(ap + ac - 3);
+		for (long i = 0; i < n_brkpt; i++) {
+			long j = brkpt_size * i;
+			//domain += (double)atom_getfloat(ap + j);
+			range_i = (double)MIN(range_i, (double)atom_getfloat(ap + j + 1));
+			range_f = (double)MAX(range_f, (double)atom_getfloat(ap + j + 1));
+		}
+	}
+	else {
+		range_i = range_f = (double)atom_getfloat(ap);
+		for (long i = 0; i < n_brkpt; i++) {
+			long j = brkpt_size * i;
+			domain += (double)atom_getfloat(ap + j + 1);
+			range_i = (double)MIN(range_i, (double)atom_getfloat(ap + j));
+			range_f = (double)MAX(range_f, (double)atom_getfloat(ap + j));
+		}
 	}
 	
 	//clear
@@ -82,26 +93,34 @@ void fl_ftom_list(t_fl_ftom *x, t_symbol *s, long argc, t_atom *argv)
 	//domain
 	atom_setfloat(atom_out, domain);
 	outlet_anything(x->m_outlet, gensym("setdomain"), 1, atom_out);
-	//range
+	//range	
 	atom_setfloat(atom_out, range_i);
 	atom_setfloat(atom_out + 1, range_f);
 	outlet_anything(x->m_outlet, gensym("setrange"), 2, atom_out);
 	//breakpoints
-	x_accum = 0;
-	for (long i = 0; i < n_brkpt; i++) {
-		long j = brkpt_size * i;
-		atom_setfloat(atom_out + 1, (double)atom_getfloat(ap + j)); //y
-		x_accum += (double)atom_getfloat(ap + j + 1);
-		atom_setfloat(atom_out, x_accum); //x
-		outlet_list(x->m_outlet, NULL, 2, atom_out);
-	}
-	//curve
 	if (brkpt_size == 3) {
+		for (long i = 0; i < n_brkpt; i++) {
+			long j = brkpt_size * i;
+			atom_setfloat(atom_out, (double)atom_getfloat(ap + j)); //x
+			atom_setfloat(atom_out + 1, (double)atom_getfloat(ap + j + 1)); //y
+			outlet_list(x->m_outlet, NULL, 2, atom_out);
+		}
+		//curves	
 		for (long i = 1; i < n_brkpt; i++) {
 			long j = brkpt_size * i;
 			atom_setlong(atom_out, i);
 			atom_setfloat(atom_out + 1, (double)atom_getfloat(ap + j + 2));
 			outlet_anything(x->m_outlet, gensym("setcurve"), 2, atom_out);
+		}
+	}
+	else{
+		long x_accum = 0;
+		for (long i = 0; i < n_brkpt; i++) {
+			long j = brkpt_size * i;
+			x_accum += (double)atom_getfloat(ap + j + 1);
+			atom_setfloat(atom_out, x_accum); //x
+			atom_setfloat(atom_out + 1, (double)atom_getfloat(ap + j)); //y
+			outlet_list(x->m_outlet, NULL, 2, atom_out);
 		}
 	}
 }
