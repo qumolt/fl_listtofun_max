@@ -3,7 +3,8 @@
 #include "z_dsp.h"  
 #include <math.h>
 
-#define DFLT_LINEAL 0
+#define DFLT_LINEAL 0	//mode 0 lineal
+#define DFLT_LISTDUMP 0	//line format
 
 //#define MIN(a,b) ((a) < (b) ? (a) : (b))
 //#define MAX(a,b) ((a) > (b) ? (a) : (b))
@@ -16,6 +17,7 @@ typedef struct {
 	t_object obj;
 	
 	short mode;
+	short listdump;
 
 	void *m_outlet;
 
@@ -28,5 +30,6 @@ void fl_ftom_entero(t_fl_ftom *x, long n);
 void fl_ftom_float(t_fl_ftom *x, double f); 
 void fl_ftom_list(t_fl_ftom *x, t_symbol *s, long argc, t_atom *argv);
 void fl_ftom_mode(t_fl_ftom *x, t_symbol *s, long argc, t_atom *argv);
+void fl_ftom_listdump(t_fl_ftom *x, t_symbol *s, long argc, t_atom *argv);
 
 static t_class *fl_ftom_class;
