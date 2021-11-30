@@ -28,6 +28,7 @@ void fl_ftom_assist(t_fl_ftom *x, void *b, long msg, long arg, char *dst);
 
 void fl_ftom_entero(t_fl_ftom *x, long n);
 void fl_ftom_float(t_fl_ftom *x, double f); 
+void fl_ftom_mclist(t_fl_ftom *x, t_symbol *s, long argc, t_atom *argv);
 void fl_ftom_list(t_fl_ftom *x, t_symbol *s, long argc, t_atom *argv);
 void fl_ftom_mode(t_fl_ftom *x, t_symbol *s, long argc, t_atom *argv);
 void fl_ftom_listdump(t_fl_ftom *x, t_symbol *s, long argc, t_atom *argv);
